@@ -1,8 +1,8 @@
 CC := clang
-CFLAGS := -lluajit -shared
+CFLAGS := -L $(LUA_INCLUDE_DIR) -lluajit -shared
 OBJS = timer.so
 all: $(OBJS)
 clean:
-	rm *.so	
-$(OBJS): %.so: modules/%.c
+	rm *.so
+$(OBJS): %.so: src/%.c
 	$(CC) $(CFLAGS) $< -o $@
