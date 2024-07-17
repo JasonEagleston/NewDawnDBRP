@@ -1,34 +1,32 @@
+local server_config = require("server_config")
+---@class love
 local love = require("love")
 local enet = require("enet")
-local events = require("shared/events")
+local events = require("src/events")
 
 local client_connected = false
 local host = enet.host_create()
-local server = host:connect("localhost:5515")
+local server = host:connect(server_config.address .. ":" .. server_config.port)
 local time = 0
 
-function send_message(msg)
+---@class EventHandler
+local event_handler = events.EventHandler:new()
+
+function love.keypressed(key) end
+
+---@param msg string Message to send to server.
+function Send_Message(msg)
     if not client_connected then
         return 0
     end
     server:send(msg)
 end
 
-local event_handler = events.EventHandler:new()
-local message_event = events.Event:new(0, function(handler, event, time)
-    if time >= event.tick_time then
-        event.tick_time = time + 1000
-        send_message("TEST")
-    end
-    return 1
-end)
-
-table.insert(event_handler.events, message_event)
-
 function love.update(dt)
     local event = host:service()
     while event do
-        if event.type == "connect" then
+        if event.type == "receive" then
+        elseif event.type == "connect" then
             print("Connected.")
             client_connected = true
         elseif event.type == "disconnect" then

@@ -28,7 +28,7 @@ static int get_time(lua_State *L) {
     return 1;
 }
 static int lua_sleep(lua_State *L) {
-    usleep((int)luaL_checknumber(L, 1));
+    usleep((int)luaL_checkinteger(L, 1) * 1000);
     return 1;
 }
 

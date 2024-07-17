@@ -1,3 +1,4 @@
+---@module 'events'
 local events = {}
 
 local timer = require("timer")
@@ -6,13 +7,13 @@ local timer = require("timer")
 ---@field tick_time integer
 ---@field callback function
 events.Event = {}
----@param tick_time integer Time until next tick.
+---@param tick_time integer Time when next tick occurs.
 ---@param callback function Callback function.
 ---@return Event
 function events.Event:new(tick_time, callback)
     local o = {
         tick_time = tick_time,
-        callback = callback
+        callback = callback,
     }
     setmetatable(o, self)
     self.__index = self
@@ -38,7 +39,7 @@ function events.EventHandler:tick()
         local event = self.events[i]
         if time >= event.tick_time then
             local retval = event.callback(self, event, time)
-            if not retval == 1 then 
+            if not retval == 1 then
                 self.events[i] = nil
             end
         end
