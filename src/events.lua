@@ -7,10 +7,14 @@ Event = class(function(event, tick_time, callback)
 end)
 
 ---@class EventHandler
----@field events [Event]
+---@field events table<Event>
 EventHandler = class(function(event_handler)
     event_handler.events = {}
 end)
+
+function EventHandler:add_event(event)
+    table.insert(self.events, event)
+end
 
 function EventHandler:tick()
     local time = timer.get_time()

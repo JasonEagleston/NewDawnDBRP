@@ -18,7 +18,6 @@ local zen = require("luazen")
 
 local client_connected = false
 local host = enet.host_create()
-server_config.address = "127.0.0.1"
 local server = nil
 local time = 0
 
@@ -27,6 +26,31 @@ local open_uis = { "main_menu" }
 
 function Quit_Game()
     os.exit(0, true)
+end
+
+local is_connecting = false
+local connect_timeout = 0
+
+local event_handler = EventHandler()
+
+function Try_Connect(address, port)
+    if server and table.has({ "connecting", "connection_pending", "connected" }, server:state()) then
+        server:disconnect()
+        local event = Event(0, function(handler, event, time)
+            event.tick_time = time + 100
+            if server:state() == "disconnected" then
+                Try_Connect(event.address, event.port)
+                return 0
+            end
+            return 1
+        end)
+        event.address = address
+        event.port = port
+        event_handler:add_event(event)
+        return
+    end
+    connect_timeout = timer.get_time() + 5000
+    server = host:connect(address .. ":" .. port)
 end
 
 local ui_data = {
@@ -44,7 +68,11 @@ local ui_callback = {
             ui:edit('field', ui_data["main_menu"].address)
             ui:edit('field', ui_data["main_menu"].port)
             ui:layoutRow('dynamic', 32, 1)
-            ui:button("Connect")
+            if is_connecting then
+                ui:label("Connecting...")
+            elseif ui:button("Connect") then
+                Try_Connect(ui_data["main_menu"].address.value, ui_data["main_menu"].port.value)
+            end
             if ui:button("Settings") then
                 table.remove_val(open_uis, "main_menu")
                 table.insert(open_uis, "settings")
@@ -68,9 +96,6 @@ local ui_callback = {
     end
 }
 
----@class EventHandler
-local event_handler = EventHandler()
-
 ---@param msg string Message to send to server.
 function Send_Message(msg)
     if not client_connected or server == nil then
@@ -86,6 +111,14 @@ end
 
 function love.update(dt)
     local event = host:service()
+    is_connecting = false
+    if server and (server:state() == "connecting" or server:state() == "connection_pending") then
+        if timer.get_time() >= connect_timeout then
+            server:disconnect_now()
+        else
+            is_connecting = true
+        end
+    end
     while event do
         if event.type == "receive" then
         elseif event.type == "connect" then
