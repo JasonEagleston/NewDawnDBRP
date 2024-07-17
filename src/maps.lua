@@ -1,21 +1,10 @@
-local Obj = require("src/Obj")
-
-local maps = {}
-
 ---@class Tile
 ---@field id integer
 ---@field objs Obj[]
-local Tile = {}
-
-function Tile:new(id)
-    local o = {
-        id = id,
-        objs = {},
-    }
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
+Tile = class(function(tile, id)
+    tile.id = id
+    tile.objs = {}
+end)
 
 ---@param obj Obj
 function Tile:add_obj(obj)
@@ -44,22 +33,12 @@ end
 ---@class Map
 ---@field width integer
 ---@field height integer
----@field tiles [Tile]
-local Map = {}
-
----@param width integer
----@param height integer
----@param tiles [Tile]
-function Map:new(o, width, height, tiles)
-    o = o or {
-        width = width,
-        height = height,
-        tiles = tiles,
-    }
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
+---@field tiles Tile[]
+Map = class(function(map, width, height, tiles)
+    map.width = width
+    map.height = height
+    map.tiles = tiles
+end)
 
 ---@param x integer
 ---@param y integer
@@ -69,5 +48,3 @@ function Map:get_tile(x, y)
 end
 
 function Map:add_obj() end
-
-return maps

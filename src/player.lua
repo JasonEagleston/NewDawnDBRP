@@ -1,16 +1,5 @@
-local Obj = require("src/obj")
 ---@class Player
 ---@field obj Obj
-local Player = {}
-
----@return Player
-function Player:new()
-    local o = {
-        obj = Obj:new()
-    }
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
-
-return Player
+Player = class(function(player, obj)
+    player.obj = obj or Obj({ 0, 0 }, player)
+end)

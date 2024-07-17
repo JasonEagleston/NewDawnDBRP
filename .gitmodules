@@ -2,5 +2,8 @@
 	path = lua-enet
 	url = https://github.com/leafo/lua-enet
 [submodule "love-nuklear"]
-    path = love-nuklear
-    url = https://github.com/keharriso/love-nuklear
+	path = love-nuklear
+	url = https://github.com/keharriso/love-nuklear
+[submodule "bitser"]
+	path = bitser
+	url = https://github.com/gvx/bitser

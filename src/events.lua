@@ -1,39 +1,18 @@
----@module 'events'
-local events = {}
-
-local timer = require("timer")
-
 ---@class Event
 ---@field tick_time integer
 ---@field callback function
-events.Event = {}
----@param tick_time integer Time when next tick occurs.
----@param callback function Callback function.
----@return Event
-function events.Event:new(tick_time, callback)
-    local o = {
-        tick_time = tick_time,
-        callback = callback,
-    }
-    setmetatable(o, self)
-    self.__index = self
-    o.tick_time = tick_time
-    o.callback = callback
-    return o
-end
+Event = class(function(event, tick_time, callback)
+    event.tick_time = tick_time
+    event.callback = callback
+end)
 
 ---@class EventHandler
 ---@field events [Event]
-events.EventHandler = {}
----@return EventHandler
-function events.EventHandler:new()
-    local o = { events = {} }
-    setmetatable(o, self)
-    self.__index = self
-    return o
-end
+EventHandler = class(function(event_handler)
+    event_handler.events = {}
+end)
 
-function events.EventHandler:tick()
+function EventHandler:tick()
     local time = timer.get_time()
     for i = #self.events, 1, -1 do
         local event = self.events[i]
@@ -46,5 +25,3 @@ function events.EventHandler:tick()
         i = i - 1
     end
 end
-
-return events

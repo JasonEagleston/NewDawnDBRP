@@ -1,8 +1,16 @@
 local server_config = require("server_config")
----@class love
-local love = require("love")
+timer = require("timer")
+require("src/class")
+require("src/obj")
+require("src/events")
+require("src/player")
+require("src/maps")
+local bitser = require("bitser/bitser")
 local enet = require("enet")
 local events = require("src/events")
+---@class love
+local love = require("love")
+local nuklear = require("nuklear")
 
 local client_connected = false
 local host = enet.host_create()
@@ -10,7 +18,7 @@ local server = host:connect(server_config.address .. ":" .. server_config.port)
 local time = 0
 
 ---@class EventHandler
-local event_handler = events.EventHandler:new()
+local event_handler = EventHandler()
 
 function love.keypressed(key) end
 
