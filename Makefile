@@ -1,5 +1,5 @@
 CC := clang
-CFLAGS := -L $(LUA_INCLUDE_DIR) -lluajit -shared
+CFLAGS := -lluajit -shared
 OBJS = timer.so
 all: $(OBJS)
 clean:

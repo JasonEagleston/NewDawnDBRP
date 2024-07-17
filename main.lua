@@ -1,6 +1,7 @@
 local server_config = require("server_config")
 timer = require("timer")
 
+require("src/core")
 require("src/class")
 require("src/obj")
 require("src/events")
@@ -18,20 +19,11 @@ local zen = require("luazen")
 local client_connected = false
 local host = enet.host_create()
 server_config.address = "127.0.0.1"
-local server = host:connect(server_config.address .. ":" .. server_config.port)
+local server = nil
 local time = 0
 
 local ui
 local open_uis = { "main_menu" }
-
-function table.remove_val(t, v)
-    for i = 1, #t do
-        if t[i] == v then
-            table.remove(t, i)
-            break
-        end
-    end
-end
 
 function Quit_Game()
     os.exit(0, true)
@@ -81,7 +73,7 @@ local event_handler = EventHandler()
 
 ---@param msg string Message to send to server.
 function Send_Message(msg)
-    if not client_connected then
+    if not client_connected or server == nil then
         return 0
     end
     server:send(msg)
@@ -107,8 +99,8 @@ function love.update(dt)
     end
     event_handler:tick()
     ui:frameBegin()
-    for _, ui in pairs(open_uis) do
-        ui_callback[ui]()
+    for _, open in pairs(open_uis) do
+        ui_callback[open]()
     end
     ui:frameEnd()
 end

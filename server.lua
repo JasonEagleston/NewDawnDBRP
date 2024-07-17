@@ -1,8 +1,11 @@
 local server_config = require("server_config")
+require("src/core")
 require("src/class")
+local bitser = require("bitser/bitser")
 local enet = require("enet")
 local events = require("src/events")
 local timer = require("timer")
+local zen = require("luazen")
 
 local last_tick = 0
 local tick_time = 15
