@@ -1,5 +1,5 @@
 local server_config = require("server_config")
-
+require("src/class")
 local enet = require("enet")
 local events = require("src/events")
 local timer = require("timer")

@@ -7,3 +7,6 @@
 [submodule "bitser"]
 	path = bitser
 	url = https://github.com/gvx/bitser
+[submodule "luazen"]
+	path = luazen
+	url = https://github.com/philanc/luazen
