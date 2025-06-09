@@ -15,6 +15,7 @@ PacketType :: enum u8 {
     LOGIN = 1,
     LOGOUT = 2,
     RACES = 3,
+    MAPS = 4,
 }
 
 from_u64 :: proc(buf: ^[dynamic]u8, n: u64, pos: int) {
@@ -36,7 +37,7 @@ to_u64 :: proc(n: ^[8]u8) -> u64 {
     
     return ret_val;
 }
-from_u16 :: proc(buf: ^[dynamic]u8, n: u16, pos: int) {
+from_u16 :: proc(buf: ^[dynamic]u8, n: u16, pos: int) -> int {
     s := mem.any_to_bytes(n);
     for i := 0; i < 2; i += 1 {
         if (pos == -1) {
@@ -45,6 +46,7 @@ from_u16 :: proc(buf: ^[dynamic]u8, n: u16, pos: int) {
         }
         assign_at(buf, pos + i, s[i])
     }
+    return 2;
 }
 from_string :: proc(buf: ^[dynamic]u8, s: string, pos: int) {
         if (pos == -1) {
@@ -100,6 +102,20 @@ send_race_list :: proc(client: wsserver.Client_Connection) {
     append(&p.data, cast(u8)len(races));
     for race in races { 
         from_string(&p.data, race.name, -1)
+    }
+    msg_client(client, p);
+}
+
+send_maps :: proc(client: wsserver.Client_Connection) {
+    p := packet(0, .MAPS);
+    defer free_packet(p);
+    append(&p.data, cast(u8)len(game_state.maps));
+    count := 0;
+    for _map in game_state.maps {
+        count += from_u16(&p.data, _map.width * _map.height, 1 + count);
+        for tile in _map.tiles {
+            count += from_u16(&p.data, tile.id, 1 + count);
+        }
     }
     msg_client(client, p);
 }

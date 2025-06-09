@@ -13,8 +13,8 @@ Tile :: struct {
 
 Map :: struct {
     name: string,
-    width: int,
-    height: int,
+    width: u16,
+    height: u16,
     tiles: [dynamic]Tile,
     movables: [dynamic]^Object
 }
@@ -53,7 +53,7 @@ create_map :: proc(load_map: string, name: string) -> Map {
     parsed: json.Object = _p.(json.Object);
     defer delete(parsed);
 
-    x, y :int = cast(int)parsed["width"].(json.Float), cast(int)parsed["height"].(json.Float);
+    x, y :u16 = cast(u16)parsed["width"].(json.Float), cast(u16)parsed["height"].(json.Float);
 
     _map := Map {
         name,
@@ -70,6 +70,6 @@ free_map :: proc() {
 
 }
 
-get_tile :: proc(_map: ^Map, x: int, y: int) -> ^Tile {
+get_tile :: proc(_map: ^Map, x: u16, y: u16) -> ^Tile {
     return &_map.tiles[(x - 1) + (y - 1) * _map.width];
 }

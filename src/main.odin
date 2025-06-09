@@ -57,6 +57,7 @@ main :: proc() {
             onopen = proc(client: wsserver.Client_Connection) {
                 add_client(client)
                 send_race_list(client);
+                send_maps(client);
             },
             onclose = proc(client: wsserver.Client_Connection) {
                 remove_client(client)
