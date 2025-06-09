@@ -1,55 +1,75 @@
 package main
 
+import "core:fmt"
 import "core:os"
 import "core:encoding/json"
 
-TileType :: enum {
-
-}
 
 Tile :: struct {
     id: u16,
     density: u8,
-    type: TileType,
-    contents: [dynamic]^Object
+    contents: [dynamic]^Object // Every tile will have its own contents for now. In the future, move to larger sets of tiles to avoid excessive memory use; unimportant for prototyping.
 }
 
 Map :: struct {
     name: string,
     width: int,
     height: int,
-    tiles: []Tile,
+    tiles: [dynamic]Tile,
     movables: [dynamic]^Object
 }
 
-get_tiles_from_map :: proc(^[]u8) -> []Tile {
-    return {}
+get_tiles_from_map :: proc(_map: json.Object) -> [dynamic]Tile {
+    _tiles := make([dynamic]Tile, cast(int)(_map["width"].(json.Float) * _map["height"].(json.Float)));
+    for _l in _map["layers"].(json.Array) {
+        layer := _l.(json.Object);
+        count := 0;
+        for _t in layer["data"].(json.Array) {
+            tile := cast(u16)_t.(json.Float);
+            
+            _tiles[count] = Tile {
+                id = tile,
+                density = 0,
+                contents = make([dynamic]^Object)
+            }
+            count += 1;
+        }
+    }
+
+    if DEBUG {
+        fmt.println(_tiles);
+    }
+
+    return _tiles;
 
 }
 
-get_size_from_map :: proc(^[]u8) -> (int, int) {
-    return 0, 0;
-}
-
-create_map :: proc(load_map: string) -> Map {
+create_map :: proc(load_map: string, name: string) -> Map {
 
     data, ok := os.read_entire_file(load_map);
+    defer delete(data);
 
-    defer delete(data, context.allocator);
+    _p, err := json.parse(data);
+    parsed: json.Object = _p.(json.Object);
+    defer delete(parsed);
 
-    x, y := get_size_from_map(&data);
+    x, y :int = cast(int)parsed["width"].(json.Float), cast(int)parsed["height"].(json.Float);
 
     _map := Map {
-        load_map,
+        name,
         x,
         y,
-        get_tiles_from_map(&data),
+        get_tiles_from_map(parsed),
         {},
     }
     
     return _map;
 }
 
-get_tile :: proc(_map: Map, x: int, y: int) -> ^Tile {
+free_map :: proc() {
+
+}
+
+get_tile :: proc(_map: ^Map, x: int, y: int) -> ^Tile {
     return &_map.tiles[(x - 1) + (y - 1) * _map.width];
 }

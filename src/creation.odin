@@ -22,14 +22,15 @@ races : [dynamic]Race = nil;
 init_races :: proc() {
     if data, ok := os.read_entire_file("races.json"); ok {
         defer delete(data);
-        parsed, err := json.parse(data);
-        defer delete(parsed.(json.Object));
+        _p, err := json.parse(data);
+        parsed: json.Object = _p.(json.Object);
+        defer delete(parsed);
 
         if err != .None {
             fmt.println("Error loading races.");
         }
 
-        for name, _stats in parsed.(json.Object) {
+        for name, _stats in parsed {
             stats := transmute(map[string]int)_stats.(json.Object);
             append(&races, Race {
                 name = name,

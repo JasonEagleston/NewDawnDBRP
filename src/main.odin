@@ -6,10 +6,13 @@ import "core:sync"
 import "core:fmt"
 import "core:mem"
 
+DEBUG := true;
+
 GameState :: struct {
     clients: [dynamic]^Client,
     objects: map[u32]^Object,
     port: u16,
+    maps: [dynamic]Map,
 }
 
 game_state := GameState {
@@ -43,6 +46,7 @@ message :: proc()
 main :: proc() {
 
     init_races();
+    create_map("maps/demo.tmj", "Demo");
 
     server := wsserver.Server {
         host = "127.0.0.1",
