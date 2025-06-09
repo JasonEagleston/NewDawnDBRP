@@ -6,6 +6,7 @@ import "core:os"
 
 Race :: struct {
     name: string,
+    stats: Stats
 }
 
 Stats :: struct {
@@ -16,28 +17,30 @@ Stats :: struct {
     recovery: int
 }
 
-races : []Race = {
-    Race {
-        "Alien"
-    },
-    Race {
-        "Demon"
-    },
-    Race {
-        "God"
-    },
-    Race {
-        "Human",
-    },
-}
+races : [dynamic]Race = nil;
 
 init_races :: proc() {
     if data, ok := os.read_entire_file("races.json"); ok {
         defer delete(data);
-        parser := json.make_parser(data);
-        parsed_races: = json.parse_object(&parser);
-        for race, s in cast(map[string]map[string]int)parsed_races {
-            fmt.println(race);
+        parsed, err := json.parse(data);
+        defer delete(parsed.(json.Object));
+
+        if err != .None {
+            fmt.println("Error loading races.");
         }
-    } 
+
+        for name, _stats in parsed.(json.Object) {
+            stats := transmute(map[string]int)_stats.(json.Object);
+            append(&races, Race {
+                name = name,
+                stats = {
+                    strength = stats["strength"],
+                    durability = stats["durability"],
+                    speed = stats["speed"],
+                    force = stats["force"],
+                    recovery = stats["recovery"]
+                }
+            });
+        }
+    }
 }
