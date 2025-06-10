@@ -6,7 +6,7 @@ import "core:sync"
 import "core:fmt"
 import "core:mem"
 
-DEBUG := true;
+DEBUG := false;
 
 GameState :: struct {
     clients: [dynamic]^Client,
@@ -46,7 +46,8 @@ message :: proc()
 main :: proc() {
 
     init_races();
-    create_map("maps/demo.tmj", "Demo");
+    append(&game_state.maps, create_map("maps/demo.tmj", "Demo"));
+    append(&game_state.maps, create_map("maps/demo.tmj", "Demo 2"));
 
     server := wsserver.Server {
         host = "127.0.0.1",

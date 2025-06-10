@@ -48,19 +48,20 @@ from_u16 :: proc(buf: ^[dynamic]u8, n: u16, pos: int) -> int {
     }
     return 2;
 }
-from_string :: proc(buf: ^[dynamic]u8, s: string, pos: int) {
-        if (pos == -1) {
-            append(buf, cast(u8)len(s));
-             for i := 0; i < len(s); i += 1 {
-                append(buf, s[i]);
-            }
+from_string :: proc(buf: ^[dynamic]u8, s: string, pos: int) -> int {
+    old_len := len(buf);
+    if (pos == -1) {
+        append(buf, cast(u8)len(s));
+            for i := 0; i < len(s); i += 1 {
+            append(buf, s[i]);
         }
+    }
+    return len(buf) - old_len;
 
 }
 packet :: proc(init_size: int, type: PacketType) -> ^Packet {
     p := new(Packet);
     p.data = make([dynamic]u8, init_size);
-    fmt.println(p.data);
     append(&p.data, cast(u8)type);
     
     return p;
@@ -109,9 +110,9 @@ send_race_list :: proc(client: wsserver.Client_Connection) {
 send_maps :: proc(client: wsserver.Client_Connection) {
     p := packet(0, .MAPS);
     defer free_packet(p);
-    append(&p.data, cast(u8)len(game_state.maps));
     count := 0;
     for _map in game_state.maps {
+        count += from_string(&p.data, _map.name, -1);
         count += from_u16(&p.data, _map.width * _map.height, 1 + count);
         for tile in _map.tiles {
             count += from_u16(&p.data, tile.id, 1 + count);
