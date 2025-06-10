@@ -16,6 +16,7 @@ PacketType :: enum u8 {
     LOGOUT = 2,
     RACES = 3,
     MAPS = 4,
+    CLIENT_SYNC = 5
 }
 
 from_u64 :: proc(buf: ^[dynamic]u8, n: u64, pos: int) {
@@ -82,11 +83,31 @@ client_login :: proc(client: wsserver.Client_Connection) {
 
 }
 
+sync_all_clients :: proc(client: wsserver.Client_Connection) {
+    p := packet(0, .CLIENT_SYNC);
+    defer free_packet(p)
+    for client in game_state.clients {
+        serialize_client(&p.data, client);
+    }
+    msg_client(client, p);
+}
+
+sync_client :: proc(client: wsserver.Client_Connection, id: wsserver.Client_Connection) {
+    p := packet(0, .CLIENT_SYNC);
+    defer free_packet(p);
+    for client in game_state.clients {
+        if client.id == id {
+            serialize_client(&p.data, client);
+        }
+    }
+    msg_client(client, p);
+}
+
 client_logout :: proc(client: wsserver.Client_Connection) {
     p := packet(size_of(client), .LOGOUT)
+    defer free_packet(p);
     from_u64(&p.data, client, 1);
     broadcast(p);
-    free_packet(p);
 }
 
 msg_client :: proc(client: wsserver.Client_Connection, p: ^Packet) {
