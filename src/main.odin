@@ -41,6 +41,14 @@ remove_client :: proc(client: wsserver.Client_Connection) {
     if (logout) { client_logout(client); }
 }
 
+get_client :: proc(client: wsserver.Client_Connection) -> ^Client {
+    for c in game_state.clients {
+        if c.id == client {
+            return c;
+        }
+    }
+}
+
 message :: proc()
 
 main :: proc() {
@@ -64,7 +72,10 @@ main :: proc() {
                 remove_client(client)
             },
             onmessage = proc(client: wsserver.Client_Connection, msg: []u8, type: wsserver.Frame_Type) {
-                
+                #partial switch(cast(PacketType)msg[0]) {
+                    case PacketType.CLIENT_MOVE_REQUEST:
+                        handle_client_move_request(client, msg);
+                }
             }
         }
     }

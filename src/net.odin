@@ -16,7 +16,8 @@ PacketType :: enum u8 {
     LOGOUT = 2,
     RACES = 3,
     MAPS = 4,
-    CLIENT_SYNC = 5
+    CLIENT_SYNC = 5,
+    CLIENT_MOVE_REQUEST = 6, 
 }
 
 from_u64 :: proc(buf: ^[dynamic]u8, n: u64, pos: int) {
@@ -140,4 +141,8 @@ send_maps :: proc(client: wsserver.Client_Connection) {
         }
     }
     msg_client(client, p);
+}
+
+handle_client_move_request :: proc(client: wsserver.Client_Connection, msg: ^[]u8) {
+    
 }
