@@ -143,6 +143,6 @@ send_maps :: proc(client: wsserver.Client_Connection) {
     msg_client(client, p);
 }
 
-handle_client_move_request :: proc(client: wsserver.Client_Connection, msg: ^[]u8) {
-    
+handle_client_move_request :: proc(client: wsserver.Client_Connection, x, y: u8) {
+    set_move_vec(get_client(client).mob, cast(int)x, cast(int)y);
 }

@@ -6,7 +6,7 @@ Object :: struct {
     x: f32,
     y: f32,
     name: string,
-    stats: [dynamic]Map,
+    stats: map[string]int,
     move_vec: [2]int,
     move_vec_lock: sync.Mutex
 }

@@ -17,6 +17,7 @@ GameState :: struct {
 
 game_state := GameState {
     clients = {},
+    objects = make(map[u32]^Object),
     port = 8080,
 }
 
@@ -47,6 +48,7 @@ get_client :: proc(client: wsserver.Client_Connection) -> ^Client {
             return c;
         }
     }
+    return nil;
 }
 
 message :: proc()
@@ -67,6 +69,7 @@ main :: proc() {
                 add_client(client)
                 send_race_list(client);
                 send_maps(client);
+                sync_all_clients(client);
             },
             onclose = proc(client: wsserver.Client_Connection) {
                 remove_client(client)
@@ -74,7 +77,10 @@ main :: proc() {
             onmessage = proc(client: wsserver.Client_Connection, msg: []u8, type: wsserver.Frame_Type) {
                 #partial switch(cast(PacketType)msg[0]) {
                     case PacketType.CLIENT_MOVE_REQUEST:
-                        handle_client_move_request(client, msg);
+                        x := msg[1];
+                        y := msg[2];
+                        handle_client_move_request(client, x, y);
+                        fmt.println(get_client(client).mob.move_vec);
                 }
             }
         }
