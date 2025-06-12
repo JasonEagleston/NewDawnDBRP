@@ -82,6 +82,7 @@ client_login :: proc(client: wsserver.Client_Connection) {
     broadcast(p);
     free_packet(p);
 
+
 }
 
 sync_all_clients :: proc(client: wsserver.Client_Connection) {
@@ -132,12 +133,13 @@ send_race_list :: proc(client: wsserver.Client_Connection) {
 send_maps :: proc(client: wsserver.Client_Connection) {
     p := packet(0, .MAPS);
     defer free_packet(p);
-    count := 0;
-    for _map in game_state.maps {
+    count := 1;
+    for key, _map in game_state.maps {
         count += from_string(&p.data, _map.name, -1);
-        count += from_u16(&p.data, _map.width * _map.height, 1 + count);
+        count += from_u16(&p.data, _map.width, count);
+        count += from_u16(&p.data, _map.height, count);
         for tile in _map.tiles {
-            count += from_u16(&p.data, tile.id, 1 + count);
+            count += from_u16(&p.data, tile.id, count);
         }
     }
     msg_client(client, p);

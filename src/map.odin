@@ -3,6 +3,9 @@ package main
 import "core:fmt"
 import "core:os"
 import "core:encoding/json"
+import "core:math"
+
+TILE_SIZE := 32;
 
 
 Tile :: struct {
@@ -16,7 +19,7 @@ Map :: struct {
     width: u16,
     height: u16,
     tiles: [dynamic]Tile,
-    movables: [dynamic]^Object
+    objects: [dynamic]^Object
 }
 
 get_tiles_from_map :: proc(_map: json.Object) -> [dynamic]Tile {
@@ -36,19 +39,11 @@ get_tiles_from_map :: proc(_map: json.Object) -> [dynamic]Tile {
         }
     }
 
-    if DEBUG {
-        fmt.println(_tiles);
-    }
-
     return _tiles;
-
 }
-
 create_map :: proc(load_map: string, name: string) -> Map {
-
     data, ok := os.read_entire_file(load_map);
     defer delete(data);
-
     _p, err := json.parse(data);
     parsed: json.Object = _p.(json.Object);
     defer delete(parsed);
@@ -72,4 +67,14 @@ free_map :: proc() {
 
 get_tile :: proc(_map: ^Map, x: u16, y: u16) -> ^Tile {
     return &_map.tiles[(x - 1) + (y - 1) * _map.width];
+}
+
+add_object :: proc(_map: ^Map, obj: ^Object) {
+    set_position(obj, 0.0, 0.0, _map);
+    append(&_map.objects, obj);
+}
+
+set_obj_position_map :: proc(_map: ^Map, obj: ^Object, x, y: f32) {
+    cur_tile_pos: [2]u16 = {obj.tile_pos[0], obj.tile_pos[1]};
+    new_tile_pos: [2]u16 = {cast(u16)math.trunc(x / 32), cast(u16)math.trunc(y / 32)};
 }
