@@ -28,7 +28,7 @@ get_tiles_from_map :: proc(_map: json.Object) -> [dynamic]Tile {
         layer := _l.(json.Object);
         count := 0;
         for _t in layer["data"].(json.Array) {
-            tile := cast(u16)_t.(json.Float);
+            tile := cast(u16)_t.(json.Float) - 1; // Tiled starts tiles at 1, we use 0.
             
             _tiles[count] = Tile {
                 id = tile,
@@ -69,7 +69,7 @@ get_tile :: proc(_map: ^Map, x: u16, y: u16) -> ^Tile {
     return &_map.tiles[(x - 1) + (y - 1) * _map.width];
 }
 
-add_object :: proc(_map: ^Map, obj: ^Object) {
+add_object_map :: proc(_map: ^Map, obj: ^Object) {
     set_position(obj, 0.0, 0.0, _map);
     append(&_map.objects, obj);
 }

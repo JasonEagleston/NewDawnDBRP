@@ -17,7 +17,19 @@ Stats :: struct {
     recovery: int
 }
 
+stats_to_map :: proc(stats: ^Stats) {
+    return {
+        "strength" = stats.strength,
+        "durability" = stats.durability,
+        "speed" = stats.speed,
+        "force" = stats.force,
+        "recovery" = stats.recovery
+    }
+}
+
 races : [dynamic]Race = nil;
+
+serialize_race 
 
 init_races :: proc() {
     if data, ok := os.read_entire_file("races.json"); ok {

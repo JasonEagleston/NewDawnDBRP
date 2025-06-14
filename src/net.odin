@@ -20,14 +20,10 @@ PacketType :: enum u8 {
     CLIENT_MOVE_REQUEST = 6, 
 }
 
-from_u64 :: proc(buf: ^[dynamic]u8, n: u64, pos: int) {
+from_u64 :: proc(buf: ^[dynamic]u8, n: u64) {
     s := mem.any_to_bytes(n);
     for i := 0; i < 8; i += 1 {
-        if (pos == -1) {
-            append(buf, s[i]);
-            continue;
-        }
-        assign_at(buf, pos + i, s[i])
+        append(buf, s[i]);
     }
 }
 to_u64 :: proc(n: ^[8]u8) -> u64 {
@@ -39,7 +35,7 @@ to_u64 :: proc(n: ^[8]u8) -> u64 {
     
     return ret_val;
 }
-from_u16 :: proc(buf: ^[dynamic]u8, n: u16, pos: int) -> int {
+from_u16 :: proc(buf: ^[dynamic]u8, n: u16) -> int {
     s := mem.any_to_bytes(n);
     for i := 0; i < 2; i += 1 {
         if (pos == -1) {
@@ -50,13 +46,12 @@ from_u16 :: proc(buf: ^[dynamic]u8, n: u16, pos: int) -> int {
     }
     return 2;
 }
-from_string :: proc(buf: ^[dynamic]u8, s: string, pos: int) -> int {
+from_string :: proc(buf: ^[dynamic]u8, s: string) -> int {
     old_len := len(buf);
-    if (pos == -1) {
-        append(buf, cast(u8)len(s));
-            for i := 0; i < len(s); i += 1 {
-            append(buf, s[i]);
-        }
+
+    append(buf, cast(u8)len(s));
+    for i := 0; i < len(s); i += 1 {
+        append(buf, s[i]);
     }
     return len(buf) - old_len;
 

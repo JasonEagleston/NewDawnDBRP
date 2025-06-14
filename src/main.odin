@@ -32,7 +32,7 @@ add_client :: proc(client: wsserver.Client_Connection) {
     append(&game_state.clients, new_client(client))
     client_login(client);
 
-    add_object(&game_state.maps["Demo"], _client.mob);
+    add_object_map(&game_state.maps["Demo"], _client.mob);
 }
 
 remove_client :: proc(client: wsserver.Client_Connection) {
@@ -45,6 +45,14 @@ remove_client :: proc(client: wsserver.Client_Connection) {
         }
     }
     if (logout) { client_logout(client); }
+}
+
+add_object_gamestate :: proc(obj: ^Object) {
+    game_state.objects[obj.id] = obj;
+}
+
+remove_object_gamestate :: proc(obj: ^Object) {
+    game_state.objects[obj.id] = nil;
 }
 
 get_client :: proc(client: wsserver.Client_Connection) -> ^Client {
