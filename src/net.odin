@@ -35,14 +35,16 @@ to_u64 :: proc(n: ^[8]u8) -> u64 {
     
     return ret_val;
 }
+from_f32 :: proc(buf: ^[dynamic]u8, n: f32) {
+    s := mem.any_to_bytes(n);
+    for i := 0; i < size_of(f32); i += 1 {
+        append(buf, s[i]);
+    }
+}
 from_u16 :: proc(buf: ^[dynamic]u8, n: u16) -> int {
     s := mem.any_to_bytes(n);
     for i := 0; i < 2; i += 1 {
-        if (pos == -1) {
-            append(buf, s[i]);
-            continue;
-        }
-        assign_at(buf, pos + i, s[i])
+        append(buf, s[i]);
     }
     return 2;
 }
@@ -73,7 +75,7 @@ free_packet :: proc(packet: ^Packet) {
 
 client_login :: proc(client: wsserver.Client_Connection) {
     p := packet(size_of(client), .LOGIN);
-    from_u64(&p.data, client, 1);
+    from_u64(&p.data, client);
     broadcast(p);
     free_packet(p);
 
@@ -103,7 +105,7 @@ sync_client :: proc(client: wsserver.Client_Connection, id: wsserver.Client_Conn
 client_logout :: proc(client: wsserver.Client_Connection) {
     p := packet(size_of(client), .LOGOUT)
     defer free_packet(p);
-    from_u64(&p.data, client, 1);
+    from_u64(&p.data, client);
     broadcast(p);
 }
 
@@ -119,8 +121,8 @@ send_race_list :: proc(client: wsserver.Client_Connection) {
     p := packet(0, .RACES);
     defer free_packet(p);
     append(&p.data, cast(u8)len(races));
-    for race in races { 
-        from_string(&p.data, race.name, -1)
+    for &race in races { 
+        serialize_race(&p.data, &race);
     }
     msg_client(client, p);
 }
@@ -128,13 +130,12 @@ send_race_list :: proc(client: wsserver.Client_Connection) {
 send_maps :: proc(client: wsserver.Client_Connection) {
     p := packet(0, .MAPS);
     defer free_packet(p);
-    count := 1;
     for key, _map in game_state.maps {
-        count += from_string(&p.data, _map.name, -1);
-        count += from_u16(&p.data, _map.width, count);
-        count += from_u16(&p.data, _map.height, count);
+        from_string(&p.data, _map.name);
+        from_u16(&p.data, _map.width);
+        from_u16(&p.data, _map.height);
         for tile in _map.tiles {
-            count += from_u16(&p.data, tile.id, count);
+            from_u16(&p.data, tile.id);
         }
     }
     msg_client(client, p);
