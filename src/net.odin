@@ -124,6 +124,7 @@ send_race_list :: proc(client: wsserver.Client_Connection) {
     for &race in races { 
         serialize_race(&p.data, &race);
     }
+    fmt.println(p.data);
     msg_client(client, p);
 }
 

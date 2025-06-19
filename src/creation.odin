@@ -6,7 +6,8 @@ import "core:os"
 
 Race :: struct {
     name: string,
-    stats: Stats
+    stats: Stats,
+    points: u8,
 }
 
 Stats :: struct {
@@ -37,10 +38,15 @@ serialize_race :: proc(buf: ^[dynamic]u8, race: ^Race) {
     from_string(buf, race.name);
     stat_map := stats_to_map(&race.stats);
     defer delete(stat_map);
-    for key, value in stat_map {
-        from_f32(buf, value);
-    }
-}
+    append(buf, race.points);
+    from_f32(buf, stat_map["strength"]);
+    from_f32(buf, stat_map["durability"]);
+    from_f32(buf, stat_map["force"]);
+    from_f32(buf, stat_map["resistance"]);
+    from_f32(buf, stat_map["speed"]);
+    from_f32(buf, stat_map["recovery"]);
+    from_f32(buf, stat_map["energy"]);
+}   
 
 init_races :: proc() {
     if data, ok := os.read_entire_file("races.json"); ok {
@@ -65,7 +71,8 @@ init_races :: proc() {
                     resistance = cast(f32)stats["resistance"].(json.Float),
                     recovery = cast(f32)stats["recovery"].(json.Float),
                     energy = cast(f32)stats["energy"].(json.Float),
-                }
+                },
+                points = cast(u8)stats["points"].(json.Float)
             });
         }
     }
