@@ -7,6 +7,7 @@ import "core:os"
 Race :: struct {
     name: string,
     stats: Stats,
+    max_stats: Stats,
     points: u8,
 }
 
@@ -36,16 +37,22 @@ races : [dynamic]Race = nil;
 
 serialize_race :: proc(buf: ^[dynamic]u8, race: ^Race) {
     from_string(buf, race.name);
-    stat_map := stats_to_map(&race.stats);
-    defer delete(stat_map);
     append(buf, race.points);
-    from_f32(buf, stat_map["strength"]);
-    from_f32(buf, stat_map["durability"]);
-    from_f32(buf, stat_map["force"]);
-    from_f32(buf, stat_map["resistance"]);
-    from_f32(buf, stat_map["speed"]);
-    from_f32(buf, stat_map["recovery"]);
-    from_f32(buf, stat_map["energy"]);
+
+    insert_from :: proc(buf: ^[dynamic]u8, stats: ^Stats) {
+        stat_map := stats_to_map(stats);
+        defer delete(stat_map);
+        from_f32(buf, stat_map["strength"]);
+        from_f32(buf, stat_map["durability"]);
+        from_f32(buf, stat_map["force"]);
+        from_f32(buf, stat_map["resistance"]);
+        from_f32(buf, stat_map["speed"]);
+        from_f32(buf, stat_map["recovery"]);
+        from_f32(buf, stat_map["energy"]);
+    }
+
+    insert_from(buf, &race.stats);
+    insert_from(buf, &race.max_stats);
 }   
 
 init_races :: proc() {
@@ -64,13 +71,22 @@ init_races :: proc() {
             append(&races, Race {
                 name = name,
                 stats = {
-                    strength = cast(f32)stats["strength"].(json.Float),
-                    durability = cast(f32)stats["durability"].(json.Float),
-                    speed = cast(f32)stats["speed"].(json.Float),
-                    force = cast(f32)stats["force"].(json.Float),
-                    resistance = cast(f32)stats["resistance"].(json.Float),
-                    recovery = cast(f32)stats["recovery"].(json.Float),
-                    energy = cast(f32)stats["energy"].(json.Float),
+                    strength = cast(f32)stats["strength"].(json.Array)[0].(json.Float),
+                    durability = cast(f32)stats["durability"].(json.Array)[0].(json.Float),
+                    speed = cast(f32)stats["speed"].(json.Array)[0].(json.Float),
+                    force = cast(f32)stats["force"].(json.Array)[0].(json.Float),
+                    resistance = cast(f32)stats["resistance"].(json.Array)[0].(json.Float),
+                    recovery = cast(f32)stats["recovery"].(json.Array)[0].(json.Float),
+                    energy = cast(f32)stats["energy"].(json.Array)[0].(json.Float),
+                },
+                max_stats = {
+                    strength = cast(f32)stats["strength"].(json.Array)[1].(json.Float),
+                    durability = cast(f32)stats["durability"].(json.Array)[1].(json.Float),
+                    speed = cast(f32)stats["speed"].(json.Array)[1].(json.Float),
+                    force = cast(f32)stats["force"].(json.Array)[1].(json.Float),
+                    resistance = cast(f32)stats["resistance"].(json.Array)[1].(json.Float),
+                    recovery = cast(f32)stats["recovery"].(json.Array)[1].(json.Float),
+                    energy = cast(f32)stats["energy"].(json.Array)[1].(json.Float),
                 },
                 points = cast(u8)stats["points"].(json.Float)
             });
