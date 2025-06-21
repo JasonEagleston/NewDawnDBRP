@@ -47,6 +47,10 @@ remove_client :: proc(client: wsserver.Client_Connection) {
     if (logout) { client_logout(client); }
 }
 
+tell_client :: proc(client: wsserver.Client_Connection, msg: string) {
+    return;
+}
+
 add_object_gamestate :: proc(obj: ^Object) {
     game_state.objects[obj.id] = obj;
 }
@@ -99,6 +103,31 @@ main :: proc() {
                         x := msg[1];
                         y := msg[2];
                         handle_client_move_request(client, x, y);
+                    case PacketType.CREATION_STAT_SEND:
+                        race_id := get_race_idx(msg[1]);
+                        if (race_id == -1) {
+                            // Malformed packet/race not found?
+                            break
+                        }
+                        pos := 2;
+                        stat_map := make(map[string]i64);
+                        defer delete(stat_map)
+                        for name in stat_names {
+                            stat_map[name] = cast(i64)msg[pos];
+                            pos += 1;
+                        }
+                        stats := stats_to_map(sub_stats(map_to_stats(&stat_map), races[race_id].stats));
+                        used_points := 0;
+                        for name in stat_names {
+                            used_points += cast(int)stats[name];
+                        }
+                        if used_points > cast(int)races[race_id].points {
+                            tell_client(client, "More points used than available.");
+                            remove_client(client);
+                            // Used too many points! Client error, cheating?
+                            break
+                        }
+
                 }
             }
         }

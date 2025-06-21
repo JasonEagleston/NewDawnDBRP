@@ -18,9 +18,11 @@ PacketType :: enum u8 {
     MAPS = 4,
     CLIENT_SYNC = 5,
     CLIENT_MOVE_REQUEST = 6, 
+    UPDATE_CLIENT_POSITION = 7,
+    CREATION_STAT_SEND = 8,
 }
 
-from_u64 :: proc(buf: ^[dynamic]u8, n: u64) {
+from_64 :: proc(buf: ^[dynamic]u8, n: any) {
     s := mem.any_to_bytes(n);
     for i := 0; i < 8; i += 1 {
         append(buf, s[i]);
@@ -35,7 +37,7 @@ to_u64 :: proc(n: ^[8]u8) -> u64 {
     
     return ret_val;
 }
-from_f32 :: proc(buf: ^[dynamic]u8, n: f32) {
+from_32 :: proc(buf: ^[dynamic]u8, n: any) {
     s := mem.any_to_bytes(n);
     for i := 0; i < size_of(f32); i += 1 {
         append(buf, s[i]);
@@ -75,7 +77,7 @@ free_packet :: proc(packet: ^Packet) {
 
 client_login :: proc(client: wsserver.Client_Connection) {
     p := packet(size_of(client), .LOGIN);
-    from_u64(&p.data, client);
+    from_64(&p.data, client);
     broadcast(p);
     free_packet(p);
 
@@ -105,7 +107,7 @@ sync_client :: proc(client: wsserver.Client_Connection, id: wsserver.Client_Conn
 client_logout :: proc(client: wsserver.Client_Connection) {
     p := packet(size_of(client), .LOGOUT)
     defer free_packet(p);
-    from_u64(&p.data, client);
+    from_64(&p.data, client);
     broadcast(p);
 }
 

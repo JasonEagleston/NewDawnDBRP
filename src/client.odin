@@ -15,5 +15,5 @@ new_client :: proc(id: u64) -> ^Client {
 }
 
 serialize_client :: proc(buf: ^[dynamic]u8, client: ^Client) {
-    from_u64(buf, client.id);
+    from_64(buf, client.id);
 }

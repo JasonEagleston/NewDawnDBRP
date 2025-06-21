@@ -22,15 +22,15 @@ serialize_object :: proc(buf: ^[dynamic]u8, obj: ^Object, serialize_stats: []str
     from_u16(buf, obj.tile_pos[1]);
 
     from_string(buf, obj.z.name);
-    stat_map := stats_to_map(&obj.stats);
+    stat_map := stats_to_map(obj.stats);
     defer delete(stat_map);
     for key in serialize_stats {
         from_string(buf, key);
         if key not_in obj.keyed_stats {
-            from_f32(buf, stat_map[key]);
+            from_32(buf, stat_map[key]);
             continue;
         }
-        from_u64(buf, obj.keyed_stats[key]);
+        from_64(buf, obj.keyed_stats[key]);
     }
 }
 
