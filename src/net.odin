@@ -18,7 +18,7 @@ PacketType :: enum u8 {
     MAPS = 4,
     CLIENT_SYNC = 5,
     CLIENT_MOVE_REQUEST = 6, 
-    UPDATE_CLIENT_POSITION = 7,
+    UPDATE_OBJECT_POSITION = 7,
     CREATION_STAT_SEND = 8,
 }
 

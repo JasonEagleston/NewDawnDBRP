@@ -15,12 +15,17 @@ GameState :: struct {
     tickables: [dynamic]^Object,
     port: u16,
     maps: map[string]Map,
+    now: time.Time,
+    moved_objects: [dynamic]u32,
+    moved_maps: [dynamic]u32,
 }
 
 game_state := GameState {
     clients = {},
     objects = make(map[u32]^Object),
     port = 8080,
+    moved_objects = make([dynamic]u32),
+    moved_maps = make([dynamic]u32)
 }
 
 /*
@@ -116,10 +121,11 @@ main :: proc() {
                             stat_map[name] = cast(i64)msg[pos];
                             pos += 1;
                         }
-                        stats := stats_to_map(sub_stats(map_to_stats(&stat_map), races[race_id].stats));
+                        stats := sub_stats(map_to_stats(&stat_map), races[race_id].stats);
+                        stat_map = stats_to_map(stats);
                         used_points := 0;
                         for name in stat_names {
-                            used_points += cast(int)stats[name];
+                            used_points += cast(int)stat_map[name];
                         }
                         if used_points > cast(int)races[race_id].points {
                             tell_client(client, "More points used than available.");
@@ -127,7 +133,7 @@ main :: proc() {
                             // Used too many points! Client error, cheating?
                             break
                         }
-
+                        create_character(get_client(client), race_id, stats);
                 }
             }
         }
@@ -135,9 +141,43 @@ main :: proc() {
 
     wsserver.listen(&server);
 
+
     
     for {
+        game_state.now = time.now();
+
         
+
+        for id, obj in game_state.objects {
+
+        }
+
+        packet := packet(0, .UPDATE_OBJECT_POSITION);
+        defer free_packet(packet);
+
+        for id in game_state.moved_objects {
+            obj := game_state.objects[id];
+            from_32(&packet.data, id);
+            moved_map := false;
+            for i in 0..<len(game_state.moved_maps) {
+                if game_state.moved_maps[i] == id {
+                    moved_map = true;
+                    from_32(&packet.data, 1);
+                    unordered_remove(&game_state.moved_maps, i);
+                }
+            }
+            if !moved_map {
+                from_32(&packet.data, 0);
+            }
+            from_32(&packet.data, obj.pos[0])
+            from_32(&packet.data, obj.pos[1])
+            if moved_map {
+                from_string(&packet.data, obj.z.name);
+            }
+        }
+
+        broadcast(packet);
+
+        clear(&game_state.moved_objects);
     }
 }
-

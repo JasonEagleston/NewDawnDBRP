@@ -78,3 +78,7 @@ set_obj_position_map :: proc(_map: ^Map, obj: ^Object, x, y: f32) {
     cur_tile_pos: [2]u16 = {obj.tile_pos[0], obj.tile_pos[1]};
     new_tile_pos: [2]u16 = {cast(u16)math.trunc(x / 32), cast(u16)math.trunc(y / 32)};
 }
+
+set_obj_position :: proc(obj: ^Object, x, y: f32) {
+    
+}

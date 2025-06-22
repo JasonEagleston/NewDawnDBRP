@@ -3,6 +3,7 @@ package main
 ID_COUNTER: u32 = 0;
 
 import "core:sync"
+import "core:time"
 
 Object :: struct {
     id: u32,
@@ -14,7 +15,7 @@ Object :: struct {
     keyed_stats: map[string]u64,
     move_vec: [2]int,
     move_vec_lock: sync.Mutex,
-    tickable: bool
+    tickable: bool,
 }
 
 serialize_object :: proc(buf: ^[dynamic]u8, obj: ^Object, serialize_stats: []string) {
@@ -55,9 +56,11 @@ set_move_vec :: proc(obj: ^Object, x, y: int) {
 
 set_position :: proc(obj: ^Object, x, y: f32, z: ^Map) {
     if z != nil {
+        change_map(obj, z);
         obj.z = z;
     }
     obj.pos[0] = x;
     obj.pos[1] = y;
+    append(&game_state.moved_objects, obj.id);
     set_obj_position_map(z, obj, x, y);
 }
