@@ -70,8 +70,12 @@ get_tile :: proc(_map: ^Map, x: u16, y: u16) -> ^Tile {
 }
 
 add_object_map :: proc(_map: ^Map, obj: ^Object) {
-    set_position(obj, 0.0, 0.0, _map);
-    append(&_map.objects, obj);
+    if (obj == nil) {
+        log_error("Tried to add nil object to map.");
+        return;
+    }
+   // set_position(obj, 0.0, 0.0, _map);
+ //   append(&_map.objects, obj);
 }
 
 set_obj_position_map :: proc(_map: ^Map, obj: ^Object, x, y: f32) {

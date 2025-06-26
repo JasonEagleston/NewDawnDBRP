@@ -10,7 +10,7 @@ Client :: struct {
 new_client :: proc(id: u64) -> ^Client {
     client := new(Client);
     client.id = id;
-    client.mob = new_object();
+    client.mob = nil;
     return client;
 }
 

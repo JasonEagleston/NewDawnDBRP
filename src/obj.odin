@@ -54,6 +54,11 @@ set_move_vec :: proc(obj: ^Object, x, y: int) {
     obj.move_vec[1] = y;
 }
 
+get_move_vec :: proc(obj: ^Object) -> [2]int {
+    sync.mutex_guard(&obj.move_vec_lock);
+    return { obj.move_vec[0], obj.move_vec[1] };
+}
+
 set_position :: proc(obj: ^Object, x, y: f32, z: ^Map) {
     if z != nil {
         change_map(obj, z);
@@ -63,4 +68,8 @@ set_position :: proc(obj: ^Object, x, y: f32, z: ^Map) {
     obj.pos[1] = y;
     append(&game_state.moved_objects, obj.id);
     set_obj_position_map(z, obj, x, y);
+}
+
+can_move :: proc(obj: ^Object) -> bool {
+    return true;
 }

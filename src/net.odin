@@ -77,9 +77,10 @@ free_packet :: proc(packet: ^Packet) {
 
 client_login :: proc(client: wsserver.Client_Connection) {
     p := packet(size_of(client), .LOGIN);
+    defer free_packet(p);
     from_64(&p.data, client);
     broadcast(p);
-    free_packet(p);
+    
 
 
 }
@@ -126,7 +127,6 @@ send_race_list :: proc(client: wsserver.Client_Connection) {
     for &race in races { 
         serialize_race(&p.data, &race);
     }
-    fmt.println(p.data);
     msg_client(client, p);
 }
 
@@ -144,6 +144,10 @@ send_maps :: proc(client: wsserver.Client_Connection) {
     msg_client(client, p);
 }
 
-handle_client_move_request :: proc(client: wsserver.Client_Connection, x, y: u8) {
-    set_move_vec(get_client(client).mob, cast(int)x, cast(int)y);
+handle_client_move_request :: proc(_client: wsserver.Client_Connection, x, y: u8) {
+    client := get_client(_client);
+    if client.mob == nil {
+        return;
+    }
+    set_move_vec(client.mob, cast(int)x, cast(int)y);
 }
