@@ -9,6 +9,8 @@ Object :: struct {
     id: u32,
     pos: [2]f32,
     tile_pos: [2]u16,
+    last_pos: [2]f32,
+    last_tile_pos: [2]u16,
     z: ^Map,
     name: string,
     stats: Stats,
@@ -72,4 +74,11 @@ set_position :: proc(obj: ^Object, x, y: f32, z: ^Map) {
 
 can_move :: proc(obj: ^Object) -> bool {
     return true;
+}
+
+set_last_pos :: proc(obj: ^Object) {
+    obj.last_pos[0] = obj.pos[0];
+    obj.last_pos[1] = obj.pos[1];
+    obj.last_tile_pos[0] = obj.tile_pos[0];
+    obj.last_tile_pos[1] = obj.tile_pos[1];
 }

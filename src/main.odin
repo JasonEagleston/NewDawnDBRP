@@ -94,7 +94,6 @@ main :: proc() {
     
 
     start_server :: proc(t: ^thread.Thread) {
-        fmt.println("TEST")
         server := wsserver.Server {
             host = "127.0.0.1",
             port = 8080,
@@ -102,7 +101,7 @@ main :: proc() {
             timeout_ms = 5000,
             evs = wsserver.Events {
                 onopen = proc(client: wsserver.Client_Connection) {
-                    sync.mutex_guard(&game_state.mutex);
+                    sync.guard(&game_state.mutex);
                     add_client(client);
                     send_race_list(client);
                     send_maps(client);
@@ -112,6 +111,7 @@ main :: proc() {
                     remove_client(client)
                 },
                 onmessage = proc(client: wsserver.Client_Connection, msg: []u8, type: wsserver.Frame_Type) {
+                    sync.guard(&game_state.mutex);
                     if true {
                         return
                     }
@@ -154,22 +154,25 @@ main :: proc() {
     }
     server_thread = thread.create(start_server);
     thread.start(server_thread);
+
+    position_packet := packet(.UPDATE_OBJECT_POSITION);
     
     for {
-        sync.mutex_guard(&game_state.mutex);
+        sync.lock(&game_state.mutex);
         game_state.now = time.now();
-      /*  for id, obj in game_state.objects {
+        for id, obj in &game_state.objects {
             move_vec := get_move_vec(obj);
+            set_last_pos(obj);
             if !can_move(obj) || (move_vec[0] == 0 && move_vec[1] == 0) {continue;}
             set_position(obj, obj.pos[0] + 5.0 * cast(f32)move_vec[0], obj.pos[1] + 5.0 * cast(f32)move_vec[1], nil);
         }
 
-        packet := packet(0, .UPDATE_OBJECT_POSITION);
-        defer free_packet(packet);
+        updated_position := false;
 
         for id in game_state.moved_objects {
+            updated_position = true;
             obj := game_state.objects[id];
-            from_32(&packet.data, id);
+            from_32(&position_packet.data, id);
             moved_map := false;
             for i in 0..<len(game_state.moved_maps) {
                 if game_state.moved_maps[i] == id {
@@ -177,16 +180,21 @@ main :: proc() {
                     unordered_remove(&game_state.moved_maps, i);
                 }
             }
-            from_32(&packet.data, 1 if moved_map else 0);
-            from_32(&packet.data, obj.pos[0])
-            from_32(&packet.data, obj.pos[1])
+            from_32(&position_packet.data, 1 if moved_map else 0);
+            from_32(&position_packet.data, obj.pos[0])
+            from_32(&position_packet.data, obj.pos[1])
             if moved_map {
-                from_string(&packet.data, obj.z.name);
+                from_string(&position_packet.data, obj.z.name);
             }
         }
 
-       // broadcast(packet);
+        if len(game_state.moved_objects) > 0 {
+            broadcast(position_packet);
+        }
 
-        clear(&game_state.moved_objects);*/
+        clear(&game_state.moved_objects);
+        sync.unlock(&game_state.mutex);
+        reset_packet(position_packet);
+        sleep_ms(20);
     }
 }

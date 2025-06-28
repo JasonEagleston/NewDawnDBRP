@@ -60,9 +60,9 @@ from_string :: proc(buf: ^[dynamic]u8, s: string) -> int {
     return len(buf) - old_len;
 
 }
-packet :: proc(init_size: int, type: PacketType) -> ^Packet {
+packet :: proc(type: PacketType) -> ^Packet {
     p := new(Packet);
-    p.data = make([dynamic]u8, init_size);
+    p.data = make([dynamic]u8);
     append(&p.data, cast(u8)type);
     
     return p;
@@ -73,10 +73,16 @@ free_packet :: proc(packet: ^Packet) {
     free(packet);
 }
 
+reset_packet :: proc(packet: ^Packet) {
+    packet_id := packet.data[0];
+    clear(&packet.data);
+    append(&packet.data, packet_id);
+}
+
 
 
 client_login :: proc(client: wsserver.Client_Connection) {
-    p := packet(size_of(client), .LOGIN);
+    p := packet(.LOGIN);
     defer free_packet(p);
     from_64(&p.data, client);
     broadcast(p);
@@ -86,7 +92,7 @@ client_login :: proc(client: wsserver.Client_Connection) {
 }
 
 sync_all_clients :: proc(client: wsserver.Client_Connection) {
-    p := packet(0, .CLIENT_SYNC);
+    p := packet(.CLIENT_SYNC);
     defer free_packet(p)
     for client in game_state.clients {
         serialize_client(&p.data, client);
@@ -95,7 +101,7 @@ sync_all_clients :: proc(client: wsserver.Client_Connection) {
 }
 
 sync_client :: proc(client: wsserver.Client_Connection, id: wsserver.Client_Connection) {
-    p := packet(0, .CLIENT_SYNC);
+    p := packet(.CLIENT_SYNC);
     defer free_packet(p);
     for client in game_state.clients {
         if client.id == id {
@@ -106,7 +112,7 @@ sync_client :: proc(client: wsserver.Client_Connection, id: wsserver.Client_Conn
 }
 
 client_logout :: proc(client: wsserver.Client_Connection) {
-    p := packet(size_of(client), .LOGOUT)
+    p := packet(.LOGOUT)
     defer free_packet(p);
     from_64(&p.data, client);
     broadcast(p);
@@ -121,7 +127,7 @@ broadcast :: proc(p: ^Packet) {
 }
 
 send_race_list :: proc(client: wsserver.Client_Connection) {
-    p := packet(0, .RACES);
+    p := packet(.RACES);
     defer free_packet(p);
     append(&p.data, cast(u8)len(races));
     for &race in races { 
@@ -131,7 +137,7 @@ send_race_list :: proc(client: wsserver.Client_Connection) {
 }
 
 send_maps :: proc(client: wsserver.Client_Connection) {
-    p := packet(0, .MAPS);
+    p := packet(.MAPS);
     defer free_packet(p);
     for key, _map in game_state.maps {
         from_string(&p.data, _map.name);

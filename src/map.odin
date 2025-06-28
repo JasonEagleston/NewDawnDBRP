@@ -74,8 +74,8 @@ add_object_map :: proc(_map: ^Map, obj: ^Object) {
         log_error("Tried to add nil object to map.");
         return;
     }
-   // set_position(obj, 0.0, 0.0, _map);
- //   append(&_map.objects, obj);
+    set_position(obj, 0.0, 0.0, _map);
+    append(&_map.objects, obj);
 }
 
 set_obj_position_map :: proc(_map: ^Map, obj: ^Object, x, y: f32) {
@@ -83,6 +83,6 @@ set_obj_position_map :: proc(_map: ^Map, obj: ^Object, x, y: f32) {
     new_tile_pos: [2]u16 = {cast(u16)math.trunc(x / 32), cast(u16)math.trunc(y / 32)};
 }
 
-set_obj_position :: proc(obj: ^Object, x, y: f32) {
-    
+change_map :: proc(obj: ^Object, _map: ^Map) {
+    append(&game_state.moved_maps, obj.id);
 }
