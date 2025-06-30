@@ -112,9 +112,6 @@ main :: proc() {
                 },
                 onmessage = proc(client: wsserver.Client_Connection, msg: []u8, type: wsserver.Frame_Type) {
                     sync.guard(&game_state.mutex);
-                    if true {
-                        return
-                    }
                     #partial switch(cast(PacketType)msg[0]) {
                         case PacketType.CLIENT_MOVE_REQUEST:
                             x := msg[1];
@@ -124,6 +121,8 @@ main :: proc() {
                             race_id := get_race_idx(msg[1]);
                             if (race_id == -1) {
                                 // Malformed packet/race not found?
+                                tell_client(client, "Bad race ID.");
+                                remove_client(client);
                                 break
                             }
                             pos := 2;
@@ -152,6 +151,7 @@ main :: proc() {
         }
         wsserver.listen(&server);
     }
+    
     server_thread = thread.create(start_server);
     thread.start(server_thread);
 

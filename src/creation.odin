@@ -152,7 +152,3 @@ create_character :: proc(client: ^Client, race_id: int, stats: Stats) {
     mob := client.mob;
     mob.stats = add_stats(races[race_id].stats, stats);   
 }
-
-change_map :: proc(obj: ^Object, _map: ^Map) {
-    append(&game_state.moved_maps, obj.id);
-}
