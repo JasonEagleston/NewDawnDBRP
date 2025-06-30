@@ -156,8 +156,9 @@ main :: proc() {
     thread.start(server_thread);
 
     position_packet := packet(.UPDATE_OBJECT_POSITION);
-    
+
     for {
+        
         sync.lock(&game_state.mutex);
         game_state.now = time.now();
         for id, obj in &game_state.objects {

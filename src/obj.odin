@@ -40,7 +40,11 @@ serialize_object :: proc(buf: ^[dynamic]u8, obj: ^Object, serialize_stats: []str
 new_object :: proc() -> ^Object {
     obj := new(Object);
     obj.id = ID_COUNTER;
+    obj.pos = {0.0, 0.0};
+    obj.tile_pos = {0, 0};
     ID_COUNTER += 1;
+
+    add_object_gamestate(obj);
     
 
     return obj;  
