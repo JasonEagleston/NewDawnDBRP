@@ -20,6 +20,7 @@ PacketType :: enum u8 {
     CLIENT_MOVE_REQUEST = 6, 
     UPDATE_OBJECT_POSITION = 7,
     CREATION_STAT_SEND = 8,
+    OBJ_CREATED = 9
 }
 
 from_64 :: proc(buf: ^[dynamic]u8, n: any) {
@@ -158,10 +159,22 @@ handle_client_move_request :: proc(_client: wsserver.Client_Connection, x, y: u8
     set_move_vec(client.mob, cast(int)x, cast(int)y);
 }
 
+object_created_broadcast :: proc(obj: ^Object) {
+    p := packet(.OBJ_CREATED);
+    defer free_packet(p);
+    serialize_object(&p.data, obj, {})
+    broadcast(p);
+}
+
+client_stat_sync_list : []string = {"strength", "durability", "force", "resistance", "speed", "energy", "recovery"}
+
 client_created_character :: proc(_client: wsserver.Client_Connection) {
     client := get_client(_client);
     p := packet(.CREATION_STAT_SEND);
     defer free_packet(p);
     append(&p.data, 1);
-    serialize_object(&p.data, client.mob, {});
+    from_64(&p.data, client.id);
+    serialize_object(&p.data, client.mob, client_stat_sync_list);
+    msg_client(_client, p);
+    object_created_broadcast(client.mob);
 }

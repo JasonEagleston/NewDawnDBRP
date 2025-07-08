@@ -21,6 +21,7 @@ Object :: struct {
 }
 
 serialize_object :: proc(buf: ^[dynamic]u8, obj: ^Object, serialize_stats: []string) {
+    from_32(buf, obj.id);
     from_u16(buf, obj.tile_pos[0]);
     from_u16(buf, obj.tile_pos[1]);
 

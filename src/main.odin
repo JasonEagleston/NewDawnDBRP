@@ -118,6 +118,7 @@ main :: proc() {
                             y := msg[2];
                             handle_client_move_request(client, x, y);
                         case PacketType.CREATION_STAT_SEND:
+                            // If no name, send 0b010 | If stats are not max, send 0b100. If good, send 0b001.
                             race_id := get_race_idx(msg[1]);
                             if (race_id == -1) {
                                 // Malformed packet/race not found?
