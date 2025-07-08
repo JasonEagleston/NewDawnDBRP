@@ -150,5 +150,5 @@ init_races :: proc() {
 create_character :: proc(client: ^Client, race_id: int, stats: Stats) {
     client.mob = new_object();
     mob := client.mob;
-    mob.stats = add_stats(races[race_id].stats, stats);   
+    mob.stats = add_stats(races[race_id].stats, stats); 
 }

@@ -157,3 +157,11 @@ handle_client_move_request :: proc(_client: wsserver.Client_Connection, x, y: u8
     }
     set_move_vec(client.mob, cast(int)x, cast(int)y);
 }
+
+client_created_character :: proc(_client: wsserver.Client_Connection) {
+    client := get_client(_client);
+    p := packet(.CREATION_STAT_SEND);
+    defer free_packet(p);
+    append(&p.data, 1);
+    serialize_object(&p.data, client.mob, {});
+}

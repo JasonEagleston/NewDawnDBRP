@@ -145,6 +145,8 @@ main :: proc() {
                                 break
                             }
                             create_character(get_client(client), race_id, stats);
+                            client_created_character(client);
+                            
                     }
                 }
             }
