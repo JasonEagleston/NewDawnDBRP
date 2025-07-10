@@ -22,5 +22,5 @@ seen_objects :: proc(client: ^Client) {
     if client.mob == nil {
         return;
     }
-    objs := get_objs_in_eye(client.mob);
+    for 
 }
