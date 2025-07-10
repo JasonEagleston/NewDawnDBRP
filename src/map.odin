@@ -65,7 +65,16 @@ free_map :: proc() {
 
 }
 
-get_tile :: proc(_map: ^Map, x: u16, y: u16) -> ^Tile {
+get_tile :: proc {
+    get_tile_array,
+    get_tile_xy,
+}
+
+get_tile_array :: proc(_map: ^Map, pos: [2]u16) -> ^Tile {
+    return &_map.tiles[(pos[0] - 1) + (pos[1] - 1) * _map.width];
+}
+
+get_tile_xy :: proc(_map: ^Map, x: u16, y: u16) -> ^Tile {
     return &_map.tiles[(x - 1) + (y - 1) * _map.width];
 }
 

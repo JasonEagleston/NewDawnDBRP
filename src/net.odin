@@ -159,10 +159,17 @@ handle_client_move_request :: proc(_client: wsserver.Client_Connection, x, y: u8
     set_move_vec(client.mob, cast(int)x, cast(int)y);
 }
 
+sync_object :: proc(_client: wsserver.Client_Connection, obj: ^Object) {
+
+}
+
 object_created_broadcast :: proc(obj: ^Object) {
     p := packet(.OBJ_CREATED);
     defer free_packet(p);
     serialize_object(&p.data, obj, {})
+    for client in game_state.clients {
+        obj_seen(obj, client);
+    }
     broadcast(p);
 }
 

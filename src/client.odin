@@ -17,3 +17,10 @@ new_client :: proc(id: u64) -> ^Client {
 serialize_client :: proc(buf: ^[dynamic]u8, client: ^Client) {
     from_64(buf, client.id);
 }
+
+seen_objects :: proc(client: ^Client) {
+    if client.mob == nil {
+        return;
+    }
+    objs := get_objs_in_eye(client.mob);
+}
